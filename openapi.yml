@@ -1,0 +1,520 @@
+openapi: 3.1.0
+info:
+  title: Fast Pay Payment API
+  version: v1.0
+  description: API for processing payments, managing tokenized cards, and handling refunds/cancellations.
+servers:
+  - url: http://localhost:9995/api/v1
+    description: Local development server
+paths:
+  /payments/{paymentId}/refund:
+    put:
+      tags:
+        - Payment Management
+      summary: Refund a completed payment
+      operationId: refundPayment
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: pay_xyz789abc456
+          description: The unique ID of the payment to refund.
+        - name: Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
+          description: Private token for Token.
+      responses:
+        '204':
+          description: No Content. Payment was successfully refunded.
+        '404':
+          description: Payment not found.
+        '409':
+          description: Payment cannot be refunded (e.g., already refunded or cancelled).
+  /payments/{paymentId}/cancel:
+    put:
+      tags:
+        - Payment Management
+      summary: Cancel a pending or processing payment
+      operationId: cancelPayment
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: pay_abc123def456
+          description: The unique ID of the payment to cancel.
+        - name: Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
+          description: Private token for Token.
+      responses:
+        '204':
+          description: No Content. Payment was successfully cancelled.
+        '404':
+          description: Payment not found.
+        '409':
+          description: Payment cannot be cancelled (e.g., already paid or refunded).
+  /public/tokenized-cards:
+    post:
+      tags:
+        - Tokenization
+      summary: Tokenize a credit card
+      description: Tokenizes raw credit card information for secure storage and future payments.
+      operationId: tokenizeCard
+      parameters:
+        - name: Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: tDBmh0ZiDrmaZ8BVQD7i9UYdcj9KtZUk
+          description: Public token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditCartInput'
+        required: true
+        description: The credit card details to be tokenized.
+      responses:
+        '201':
+          description: Created. The credit card was successfully tokenized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenizedCardModel'
+              example:
+                tokenizedCard: tok_xyz789abc456def123
+                expiresAt: '2026-10-07T14:00:00Z'
+  /payments:
+    post:
+      tags:
+        - Payment Management
+      summary: Create and capture a new payment
+      operationId: capturePayment
+      parameters:
+        - name: Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
+          description: Private token for Token.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentInput'
+        required: true
+        description: The details required to process a payment.
+      responses:
+        '201':
+          description: Created. Payment was successfully initiated/captured.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentModel'
+              example:
+                id: pay_abc123def456ghi789
+                totalAmount: 125.5
+                status: PAID
+                method: CREDIT
+                fullName: Jane Doe
+                document: '98765432100'
+                phone: '+15551234567'
+                addressLine1: 456 Oak St
+                addressLine2: Apt 2B
+                tokenizedCreditCardId: tok_xyz789abc456def123
+                referenceCode: xyz456789
+                replyToUrl: https://my-app.com/payment/status/pay_abc123def456ghi789
+                createdAt: '2025-10-07T15:00:00Z'
+                paidAt: '2025-10-07T15:01:15Z'
+                expiresAt: '2025-11-07T15:00:00Z'
+  /credit-cards:
+    get:
+      tags:
+        - Card Management
+      summary: Retrieve all saved cards for a customer
+      operationId: findAllCreditCardsByCustomer
+      parameters:
+        - name: customerCode
+          in: query
+          required: true
+          schema:
+            type: string
+            example: 6e148bd5-47f6-4022-b9da-07cfaa294f7a
+          description: The unique customer identifier.
+      responses:
+        '200':
+          description: OK. List of saved credit cards.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LimitedCreditCardModel'
+              example:
+                - id: cc_123abc456def
+                  lastNumbers: '1234'
+                  expMonth: 12
+                  expYear: 2028
+                  brand: Visa
+                - id: cc_789ghi012jkl
+                  lastNumbers: '5678'
+                  expMonth: 5
+                  expYear: 2026
+                  brand: MasterCard
+    post:
+      tags:
+        - Card Management
+      summary: Save a tokenized card to a customer's profile
+      description: Associates a previously tokenized card (from the /public/tokenized-cards endpoint) with a specific customer.
+      operationId: createCreditCard
+      parameters:
+        - name: Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
+          description: Private token for Token.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenizedCreditCardInput'
+        required: true
+        description: The tokenized card ID and customer code.
+      responses:
+        '201':
+          description: Created. The tokenized card was successfully saved to the customer's profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitedCreditCardModel'
+              example:
+                id: cc_123abc456def
+                lastNumbers: '1234'
+                expMonth: 12
+                expYear: 2028
+                brand: Visa
+  /payments/{paymentId}:
+    get:
+      tags:
+        - Payment Management
+      summary: Retrieve payment details by ID
+      operationId: findPaymentById
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: pay_abc123def456ghi789
+          description: The unique ID of the payment.
+        - name: Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
+          description: Private token for Token.
+      responses:
+        '200':
+          description: OK. Payment details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentModel'
+              example:
+                id: pay_abc123def456ghi789
+                totalAmount: 125.5
+                status: PAID
+                method: CREDIT
+                fullName: Jane Doe
+                document: '98765432100'
+                phone: '+15551234567'
+                addressLine1: 456 Oak St
+                addressLine2: Apt 2B
+                tokenizedCreditCardId: tok_xyz789abc456def123
+                referenceCode: xyz456789
+                replyToUrl: https://my-app.com/payment/status/pay_abc123def456ghi789
+                createdAt: '2025-10-07T15:00:00Z'
+                paidAt: '2025-10-07T15:01:15Z'
+                expiresAt: '2025-11-07T15:00:00Z'
+        '404':
+          description: Payment not found.
+components:
+  schemas:
+    CreditCartInput:
+      type: object
+      description: Raw credit card details for tokenization.
+      properties:
+        number:
+          type: string
+          maxLength: 20
+          minLength: 16
+          description: The credit card number.
+          example: '5186001700008785'
+        cvv:
+          type: string
+          maxLength: 4
+          minLength: 3
+          description: Card Verification Value (CVV).
+          example: '123'
+        holderName:
+          type: string
+          minLength: 1
+          description: The name of the cardholder.
+          example: John A. Smith
+        holderDocument:
+          type: string
+          minLength: 1
+          description: Document or ID of the cardholder (e.g., Brazilian CPF, US SSN equivalent).
+          example: '12345678900'
+        brand:
+          type: string
+          minLength: 1
+          description: The brand of the card (e.g., Visa, MasterCard).
+          example: Visa
+        expMonth:
+          type: integer
+          format: int32
+          description: Card expiration month (1-12).
+          example: 12
+        expYear:
+          type: integer
+          format: int32
+          description: Card expiration year (e.g., 2028).
+          example: 2028
+      required:
+        - brand
+        - cvv
+        - expMonth
+        - expYear
+        - holderDocument
+        - holderName
+        - number
+      example:
+        number: '4111222233334444'
+        cvv: '123'
+        holderName: John A. Smith
+        holderDocument: '12345678900'
+        brand: Visa
+        expMonth: 12
+        expYear: 2028
+    TokenizedCardModel:
+      type: object
+      description: Response model for a newly tokenized card.
+      properties:
+        tokenizedCard:
+          type: string
+          description: The secure, non-PCI token representing the credit card.
+          example: tok_xyz789abc456def123
+        expiresAt:
+          type: string
+          format: date-time
+          description: Timestamp when the token expires.
+          example: '2026-10-07T14:00:00Z'
+    PaymentInput:
+      type: object
+      description: Input details for creating a new payment.
+      properties:
+        totalAmount:
+          type: number
+          description: The total amount of the payment.
+          example: 125.5
+        method:
+          type: string
+          enum:
+            - CREDIT
+            - GATEWAY_BALANCE
+          minLength: 1
+          description: The payment method to be used.
+          example: CREDIT
+        fullName:
+          type: string
+          minLength: 1
+          description: Full name of the person making the payment.
+          example: Jane Doe
+        document:
+          type: string
+          minLength: 1
+          description: Document or ID of the buyer.
+          example: '98765432100'
+        phone:
+          type: string
+          minLength: 1
+          description: Phone number of the buyer.
+          example: '+15551234567'
+        addressLine1:
+          type: string
+          minLength: 1
+          description: First line of the billing address.
+          example: 456 Oak St
+        addressLine2:
+          type: string
+          description: Second line of the billing address (e.g., Apartment, Suite).
+          example: Apt 2B
+        tokenizedCardId:
+          type: string
+          description: The ID of the tokenized card to use for the payment.
+          example: tok_xyz789abc456def123
+        referenceCode:
+          type: string
+          minLength: 1
+          description: External identifier for link this payment with your own Payment/Order/Invoice.
+          example: xyz456789
+        replyToUrl:
+          type: string
+          description: URL to receive payment status notifications (webhook).
+          example: https://my-app.com/webhooks/payment/status
+        zipCode:
+          type: string
+          description: Billing address postal code.
+          example: '10001'
+      required:
+        - addressLine1
+        - referenceCode
+        - document
+        - fullName
+        - method
+        - phone
+        - totalAmount
+        - zipCode
+    PaymentModel:
+      type: object
+      description: Model representing a payment resource.
+      properties:
+        id:
+          type: string
+          description: The unique ID of the payment.
+          example: pay_abc123def456ghi789
+        totalAmount:
+          type: number
+          description: The total amount of the payment.
+          example: 125.5
+        status:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - FAILED
+            - PAID
+            - CANCELLED
+            - REFUNDED
+          description: The current status of the payment.
+          example: PAID
+        method:
+          type: string
+          enum:
+            - CREDIT
+            - GATEWAY_BALANCE
+          description: The payment method used.
+          example: CREDIT
+        fullName:
+          type: string
+          description: Full name of the person making the payment.
+          example: Jane Doe
+        document:
+          type: string
+          description: Document or ID of the buyer.
+          example: '98765432100'
+        phone:
+          type: string
+          description: Phone number of the buyer.
+          example: '+15551234567'
+        addressLine1:
+          type: string
+          description: First line of the billing address.
+          example: 456 Oak St
+        addressLine2:
+          type: string
+          description: Second line of the billing address.
+          example: Apt 2B
+        tokenizedCreditCardId:
+          type: string
+          description: The ID of the tokenized card used.
+          example: tok_xyz789abc456def123
+        referenceCode:
+          type: string
+          description: External identifier for the buyer/customer.
+          example: xyz456789
+        replyToUrl:
+          type: string
+          description: URL to receive payment status notifications.
+          example: https://my-app.com/payment/status/pay_abc123def456ghi789
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp of payment creation.
+          example: '2025-10-07T15:00:00Z'
+        paidAt:
+          type: string
+          format: date-time
+          description: Timestamp when the payment was successfully captured/paid.
+          example: '2025-10-07T15:01:15Z'
+        refundAt:
+          type: string
+          format: date-time
+          description: Timestamp when the payment was refunded (if applicable).
+          example: '2025-10-07T15:01:15Z'
+        expiresAt:
+          type: string
+          format: date-time
+          description: Timestamp when the payment Token expires.
+          example: '2025-11-07T15:00:00Z'
+        zipCode:
+          type: string
+          description: Billing address postal code.
+          example: '10001'
+    TokenizedCreditCardInput:
+      type: object
+      description: Input for saving a tokenized card to a customer's profile.
+      properties:
+        tokenizedCardId:
+          type: string
+          description: The token ID obtained from the tokenization endpoint.
+          example: tok_xyz789abc456def123
+        customerCode:
+          type: string
+          description: External identifier for the customer.
+          example: 6e148bd5-47f6-4022-b9da-07cfaa294f7a
+      example:
+        tokenizedCardId: tok_xyz789abc456def123
+        customerCode: 6e148bd5-47f6-4022-b9da-07cfaa294f7a
+    LimitedCreditCardModel:
+      type: object
+      description: Model representing a saved card with limited details for display.
+      properties:
+        id:
+          type: string
+          description: The unique ID of the saved credit card.
+          example: cc_123abc456def
+        lastNumbers:
+          type: string
+          description: The last four digits of the card number.
+          example: '1234'
+        expMonth:
+          type: integer
+          format: int32
+          description: Card expiration month.
+          example: 12
+        expYear:
+          type: integer
+          format: int32
+          description: Card expiration year.
+          example: 2028
+        brand:
+          type: string
+          description: The card brand.
+          example: Visa
