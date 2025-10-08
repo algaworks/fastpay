@@ -1,5 +1,7 @@
 package com.algaworks.fastpay.application.config;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,11 +17,15 @@ import java.time.Duration;
 @ConfigurationProperties("fastpay")
 public class FastPayProperties {
 
+	@NotBlank
 	private String publicToken;
 
+	@NotBlank
 	private String privateToken;
 
+	@NotBlank
 	private String hostname;
 
+	@NotNull
 	private Duration tokenizedCardExpiresIn;
 }

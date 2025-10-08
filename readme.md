@@ -8,6 +8,11 @@ Default database name: fastpay
 - public-token: tDBmh0ZiDrmaZ8BVQD7i9UYdcj9KtZUk
 - private-token: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
 
+## Payment Methods
+
+- CREDIT
+- GATEWAY_BALANCE
+
 ## Payment Statuses
 
 - PENDING

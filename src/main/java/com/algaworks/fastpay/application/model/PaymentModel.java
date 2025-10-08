@@ -35,6 +35,7 @@ public class PaymentModel {
 
 	private OffsetDateTime createdAt;
 	private OffsetDateTime paidAt;
+	private OffsetDateTime failedAt;
 	private OffsetDateTime refundAt;
 	private OffsetDateTime expiresAt;
 
@@ -56,6 +57,7 @@ public class PaymentModel {
 				.createdAt(payment.getCreatedAt())
 				.paidAt(payment.getPaidAt())
 				.refundAt(payment.getRefundAt())
+				.failedAt(payment.getFailedAt())
 				.expiresAt(payment.getExpiresAt());
 	}
 }

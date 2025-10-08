@@ -50,7 +50,6 @@ public class PaymentInput {
 				.addressLine1(this.getAddressLine1())
 				.addressLine2(this.getAddressLine2())
 				.zipCode(this.getZipCode())
-				.tokenizedCreditCardId(this.getTokenizedCardId())
 				.referenceCode(this.getReferenceCode())
 				.replyToUrl(this.getReplyToUrl())
 				.expired(false);
