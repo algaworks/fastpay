@@ -50,11 +50,11 @@ public class FastPayPaymentWebhookSimulationScheduler {
 
 		try {
 			sendWebhook(payment);
+			payment.setNotified(true);
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			log.error(String.format("Payment %s failed to notify, error: ", payment.getId()), e);
 		}
 
-		payment.setNotified(true);
 		paymentRepository.save(payment);
 	}
 
