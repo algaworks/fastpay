@@ -24,8 +24,8 @@ Default database name: fastpay
 
 ## Valid Credit Cards
 
-| Card | Brand | First Status | Webhook Status | 
-| ---- | ----- | ------------ | -------------- |
+| Card             | Brand | First Status | Webhook Status | 
+|------------------| ----- | ------------ | -------------- |
 | 5120350100064537 | Master | PENDING | PROCESSING |
 | 5120350100064545 | Master | PROCESSING | PAID |
 | 5120350100064552 | Master | PROCESSING | FAILED |
@@ -33,6 +33,7 @@ Default database name: fastpay
 | 4622943127011022 | Visa | PAID | PAID |
 | 4622943127011030 | Visa | FAILED | FAILED |
 | 4622943127011055 | Visa | REFUNDED | REFUNDED |
+| 4622943127011060 | Visa | PENDING | PENDING |
 
 
 

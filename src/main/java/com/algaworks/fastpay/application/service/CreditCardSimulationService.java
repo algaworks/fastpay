@@ -25,7 +25,8 @@ public class CreditCardSimulationService {
             new CardSimulation("4622943127011022", "Visa", PaymentStatus.PAID, PaymentStatus.PAID),
             new CardSimulation("4622943127011030", "Visa", PaymentStatus.FAILED, PaymentStatus.FAILED),
             new CardSimulation("4622943127011048", "Visa", PaymentStatus.PENDING, PaymentStatus.PENDING),
-            new CardSimulation("4622943127011055", "Visa", PaymentStatus.REFUNDED, PaymentStatus.REFUNDED)
+            new CardSimulation("4622943127011055", "Visa", PaymentStatus.REFUNDED, PaymentStatus.REFUNDED),
+            new CardSimulation("4622943127011060", "Visa", PaymentStatus.PENDING, PaymentStatus.PENDING)
     );
 
     public Optional<CardSimulation> findSimulation(String creditCardNumber) {
