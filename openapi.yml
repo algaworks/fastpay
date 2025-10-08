@@ -1,11 +1,14 @@
-openapi: 3.1.0
+openapi: 3.0.4
+
 info:
   title: Fast Pay Payment API
   version: v1.0
   description: API for processing payments, managing tokenized cards, and handling refunds/cancellations.
 servers:
-  - url: http://localhost:9995/api/v1
-    description: Local development server
+  - description: Development
+    url: "http://localhost:9995/api/v1"
+  - description: Production
+    url: "https://fastpay.algashop.com/api/v1"
 paths:
   /payments/{paymentId}/refund:
     put:
