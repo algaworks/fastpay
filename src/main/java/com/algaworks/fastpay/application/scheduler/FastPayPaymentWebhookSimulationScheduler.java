@@ -29,29 +29,33 @@ public class FastPayPaymentWebhookSimulationScheduler {
 	private final WebhookClient webhookClient;
 	private final CreditCardSimulationService creditCardSimulationService;
 
-	@Scheduled(fixedRate = 180_000L)
+	@Scheduled(fixedRate = 30000L)
 	@Transactional
 	public void simulate() {
 		log.debug("Sending webhooks");
 		List<Payment> payments = paymentRepository.findAllByNotifiedIsFalse(Limit.of(10));
 
 		for (Payment payment : payments) {
-			if (payment.getMethod().equals(PaymentMethod.CREDIT)) {
-				simulateCreditCard(payment);
-			} else if (payment.getMethod().equals(PaymentMethod.GATEWAY_BALANCE)) {
-				simulateGateway(payment);
-			}
-
-			try {
-				sendWebhook(payment);
-				payment.setNotified(true);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-				payment.setNotified(false);
-			}
+			processPayment(payment);
 		}
-		paymentRepository.saveAllAndFlush(payments);
 
+	}
+
+	private void processPayment(Payment payment) {
+		if (payment.getMethod().equals(PaymentMethod.CREDIT)) {
+			simulateCreditCard(payment);
+		} else if (payment.getMethod().equals(PaymentMethod.GATEWAY_BALANCE)) {
+			simulateGateway(payment);
+		}
+
+		try {
+			sendWebhook(payment);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+
+		payment.setNotified(true);
+		paymentRepository.save(payment);
 	}
 
 	private void sendWebhook(Payment payment) {
@@ -81,20 +85,10 @@ public class FastPayPaymentWebhookSimulationScheduler {
 		var creditCard = creditCardRepository.findById(payment.getTokenizedCreditCardId());
 		if (creditCard.isEmpty()) {
 			log.warn("Payment failed invalid card {}.", payment.getTokenizedCreditCardId());
-			payment.setStatus(PaymentStatus.FAILED);
-			payment.setFailedAt(OffsetDateTime.now());
+			payment.updateStatus(PaymentStatus.FAILED);
 		} else {
 			PaymentStatus paymentStatus = creditCardSimulationService.getWebhookStatus(creditCard.get().getNumber());
-			payment.setStatus(paymentStatus);
-
-			if (creditCard.get().getNumber().endsWith("1234")) {
-				log.warn("Payment failed test card {} ending i.", payment.getTokenizedCreditCardId());
-				payment.setStatus(PaymentStatus.FAILED);
-				payment.setFailedAt(OffsetDateTime.now());
-			} else {
-				payment.setStatus(PaymentStatus.PAID);
-				payment.setPaidAt(OffsetDateTime.now());
-			}
+			payment.updateStatus(paymentStatus);
 		}
 	}
 

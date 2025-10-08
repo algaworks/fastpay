@@ -2,6 +2,7 @@ package com.algaworks.fastpay.application.controller;
 
 import com.algaworks.fastpay.application.config.FastPayProperties;
 import com.algaworks.fastpay.application.exception.AccessDeniedOnResourceException;
+import com.algaworks.fastpay.application.exception.BusinessException;
 import com.algaworks.fastpay.application.model.*;
 import com.algaworks.fastpay.application.service.CreditCardSimulationService;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCard;
@@ -42,6 +43,10 @@ public class FastPayTokenizationController {
 				.brand(creditCardSimulationService.getBrand(input.getNumber()))
 				.assignmentExpiresAt(OffsetDateTime.now().plus(fastPayProperties.getTokenizedCardExpiresIn()))
 				.build();
+
+		if (creditCard.isCardExpired()) {
+			throw new BusinessException("The credit card is expired.");
+		}
 
 		creditCardRepository.saveAndFlush(creditCard);
 

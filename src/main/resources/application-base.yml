@@ -7,17 +7,10 @@ server:
 spring:
   application:
     name: fastpay
-  datasource:
-    url: jdbc:postgresql://localhost:5432/fastpay
-    username: postgres
-    password: postgres
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: none
+    show-sql: false
   flyway:
-    enabled: false
+    enabled: true
     locations: classpath:db/migration
-    user: postgres
-    password: postgres
-    url: jdbc:postgresql://localhost:5432/fastpay

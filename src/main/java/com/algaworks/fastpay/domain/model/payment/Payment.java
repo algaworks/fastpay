@@ -5,6 +5,7 @@ import lombok.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ import java.util.Locale;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EnableJpaAuditing
+@EntityListeners(AuditingEntityListener.class)
 public class Payment {
 
 	@Id
@@ -63,5 +64,16 @@ public class Payment {
 	private boolean expired;
 
 	private boolean notified;
+
+	public void updateStatus(PaymentStatus status) {
+		this.status = status;
+		if (status == PaymentStatus.PAID) {
+			this.paidAt = OffsetDateTime.now();
+		} else if (status == PaymentStatus.FAILED) {
+			this.failedAt = OffsetDateTime.now();
+		} else if (status == PaymentStatus.REFUNDED) {
+			this.refundAt = OffsetDateTime.now();
+		}
+	}
 
 }

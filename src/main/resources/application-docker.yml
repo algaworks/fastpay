@@ -1,20 +1,12 @@
 fastpay:
-  hostname: http://localhost:9995
-  public-token: tDBmh0ZiDrmaZ8BVQD7i9UYdcj9KtZUk
-  private-token: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
-  tokenized-card-expires-in: 2m
-
-server:
-  port: 9995
+  hostname: ${FASTPAY_HOSTNAME:http://localhost:9995}
 
 spring:
-  application:
-    name: fastpay
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost:3306}/fastpay?createDatabaseIfNotExist=true&serverTimezone=UTC
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:mysql}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
+    url: ${DATABASE_JDBC_URL:jdbc:postgresql://algashop-postgres:5432/fastpay}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+  flyway:
+    url: ${DATABASE_JDBC_URL:jdbc:postgresql://algashop-postgres:5432/fastpay}
+    user: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
