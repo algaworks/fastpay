@@ -1,5 +1,6 @@
 package com.algaworks.fastpay.application.scheduler;
 
+import com.algaworks.fastpay.application.service.CreditCardSimulationService;
 import com.algaworks.fastpay.application.webhook.PaymentWebhookEvent;
 import com.algaworks.fastpay.application.webhook.WebhookClient;
 import com.algaworks.fastpay.domain.model.payment.Payment;
@@ -16,15 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class FastPayPaymentSimulationScheduler {
+public class FastPayPaymentWebhookSimulationScheduler {
 
 	private final PaymentRepository paymentRepository;
 	private final CreditCardRepository creditCardRepository;
 	private final WebhookClient webhookClient;
+	private final CreditCardSimulationService creditCardSimulationService;
 
 	@Scheduled(fixedRate = 180_000L)
 	@Transactional
@@ -81,8 +84,18 @@ public class FastPayPaymentSimulationScheduler {
 			payment.setStatus(PaymentStatus.FAILED);
 			payment.setFailedAt(OffsetDateTime.now());
 		} else {
+			Optional<PaymentStatus> webhookStatus = creditCardSimulationService.getWebhookStatus(creditCard.get().getNumber());
+
+			if (webhookStatus.isPresent()) {
+				PaymentStatus paymentStatus = webhookStatus.get();
+				payment.setStatus(paymentStatus);
+
+			} else {
+
+			}
+
 			if (creditCard.get().getNumber().endsWith("1234")) {
-				log.warn("Payment failed test card {} ending in 1234.", payment.getTokenizedCreditCardId());
+				log.warn("Payment failed test card {} ending i.", payment.getTokenizedCreditCardId());
 				payment.setStatus(PaymentStatus.FAILED);
 				payment.setFailedAt(OffsetDateTime.now());
 			} else {

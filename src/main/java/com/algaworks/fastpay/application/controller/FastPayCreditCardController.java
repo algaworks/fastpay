@@ -16,10 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
-@Transactional
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class FastPayCreditCardController {
 
     private final CreditCardRepository creditCardRepository;
@@ -34,7 +33,8 @@ public class FastPayCreditCardController {
             throw new AccessDeniedOnResourceException("Use a valid private token.");
         }
 
-        CreditCard creditCard = creditCardRepository.findById(input.getTokenizedCardId()).orElseThrow();
+        CreditCard creditCard = creditCardRepository.findById(input.getTokenizedCardId())
+                .orElseThrow(() -> new BusinessException("Tokenized card not found."));
 
         if (creditCard.isAssigned()) {
             throw new CreditCardAlreadyAssignedCustomerException(

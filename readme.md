@@ -19,12 +19,16 @@ REFUNDED
 
 ## Valid Credit Cards
 
-### Always Paid
-### Always Failed
-### Always Processing
-### Pending then Paid
-### Processing then Paid
-### Paid then Refunded
+| Card | Brand | First Status | Webhook Status | 
+| ---- | ----- | ------------ | -------------- |
+| 5120350100064537 | Master | PENDING | PROCESSING |
+| 5120350100064545 | Master | PROCESSING | PAID |
+| 5120350100064552 | Master | PROCESSING | FAILED |
+| 5120350100064560 | Master | PAID | REFUNDED |
+| 4622943127011022 | Visa | PAID | - |
+| 4622943127011030 | Visa | FAILED | - |
+| 4622943127011048 | Visa | PENDING | - |
+| 4622943127011055 | Visa | REFUNDED | - |
 
 
 

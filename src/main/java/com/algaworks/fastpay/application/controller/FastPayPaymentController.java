@@ -4,6 +4,7 @@ import com.algaworks.fastpay.application.config.FastPayProperties;
 import com.algaworks.fastpay.application.exception.AccessDeniedOnResourceException;
 import com.algaworks.fastpay.application.exception.BusinessException;
 import com.algaworks.fastpay.application.model.*;
+import com.algaworks.fastpay.application.service.CreditCardSimulationService;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCard;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCardRepository;
 import com.algaworks.fastpay.domain.model.payment.*;
@@ -19,106 +20,78 @@ public class FastPayPaymentController {
 	private final CreditCardRepository creditCardRepository;
 	private final PaymentRepository paymentRepository;
 	private final FastPayProperties fastPayProperties;
+	private final CreditCardSimulationService creditCardSimulationService;
 
 	@PostMapping("/api/v1/payments")
 	@ResponseStatus(HttpStatus.CREATED)
-	public PaymentModel capture(@RequestBody PaymentInput input,
-								@RequestHeader("Token") String prvToken) {
-		verifyToken(prvToken);
-
-		Payment.PaymentBuilder paymentBuilder = input.toPayment();
-		loadPaymentMethodInfo(input, paymentBuilder);
-		addStatus(input, paymentBuilder);
-
-		Payment payment = paymentRepository.saveAndFlush(paymentBuilder.build());
-
-		return toModel(payment);
+	public PaymentModel capture(@RequestBody PaymentInput input, @RequestHeader("Token") String prvToken) {
+		verifyPrivateToken(prvToken);
+		Payment payment = paymentRepository.saveAndFlush(buildPayment(input));
+		return PaymentModel.of(payment).build();
 	}
 
 	@GetMapping("/api/v1/payments/{paymentId}")
-	public PaymentModel findById(@PathVariable String paymentId,
-								 @RequestHeader("Token") String prvToken) {
-		verifyToken(prvToken);
-
-		Payment payment = paymentRepository.findById(paymentId)
-				.orElseThrow(() -> new BusinessException("Payment not found."));
-
-		return toModel(payment);
+	public PaymentModel findById(@PathVariable String paymentId, @RequestHeader("Token") String prvToken) {
+		verifyPrivateToken(prvToken);
+		Payment payment = findPaymentById(paymentId);
+		return PaymentModel.of(payment).build();
 	}
 
 	@PutMapping("/api/v1/payments/{paymentId}/refund")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void refund(@PathVariable String paymentId,
-					   @RequestHeader("Token") String prvToken) {
-		verifyToken(prvToken);
-
-		Payment payment = paymentRepository.findById(paymentId)
-				.orElseThrow(() -> new BusinessException("Payment not found."));
-
-		if (!payment.getStatus().equals(PaymentStatus.PAID)) {
-			throw new BusinessException("Payment is not paid, it cannot be refunded.");
-		}
-
-		payment.setStatus(PaymentStatus.REFUNDED);
-
-		paymentRepository.saveAndFlush(payment);
+	public void refund(@PathVariable String paymentId, @RequestHeader("Token") String prvToken) {
+		verifyPrivateToken(prvToken);
+		Payment payment = findPaymentById(paymentId);
+		validateStatus(payment, PaymentStatus.PAID, "Payment is not paid, it cannot be refunded.");
+		updatePaymentStatus(payment, PaymentStatus.REFUNDED);
 	}
 
 	@PutMapping("/api/v1/payments/{paymentId}/cancel")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void cancel(@PathVariable String paymentId,
-					   @RequestHeader("Token") String prvToken) {
-		verifyToken(prvToken);
-
-		Payment payment = paymentRepository.findById(paymentId)
-				.orElseThrow(() -> new BusinessException("Payment not found."));
-
-		if (!payment.getStatus().equals(PaymentStatus.PENDING)) {
-			throw new BusinessException(String.format("Payment is not pending, it is %s, it cannot be cancelled.",
-					payment.getStatus()));
-		}
-
-		payment.setStatus(PaymentStatus.CANCELLED);
-
-		paymentRepository.saveAndFlush(payment);
+	public void cancel(@PathVariable String paymentId, @RequestHeader("Token") String prvToken) {
+		verifyPrivateToken(prvToken);
+		Payment payment = findPaymentById(paymentId);
+		validateStatus(payment, PaymentStatus.PENDING, String.format("Payment is not pending, it is %s, it cannot be cancelled.", payment.getStatus()));
+		updatePaymentStatus(payment, PaymentStatus.CANCELLED);
 	}
 
-	private void verifyToken(String prvToken) {
-		if (!this.fastPayProperties.getPrivateToken().equals(prvToken)) {
+	private void verifyPrivateToken(String prvToken) {
+		if (!fastPayProperties.getPrivateToken().equals(prvToken)) {
 			throw new AccessDeniedOnResourceException("Use a valid private token.");
 		}
 	}
 
-	private void addStatus(PaymentInput input, Payment.PaymentBuilder paymentBuilder) {
-		paymentBuilder.status(PaymentStatus.PROCESSING); //todo if com base no cartao
-	}
-
-	private PaymentModel toModel(Payment payment) {
-		return PaymentModel.build(payment).build();
-	}
-
-	private void loadPaymentMethodInfo(PaymentInput input, Payment.PaymentBuilder paymentBuilder) {
+	private Payment buildPayment(PaymentInput input) {
+		Payment.PaymentBuilder builder = input.toPayment();
 		if (input.getMethod().equals(PaymentMethod.CREDIT)) {
-			loadCardInfo(input, paymentBuilder);
-		}
-	}
-
-	private void loadCardInfo(PaymentInput input, Payment.PaymentBuilder paymentBuilder) {
-		if (input.getTokenizedCardId() != null) {
-			loadTockenizedCard(input, paymentBuilder);
+			CreditCard creditCard = findCreditCard(input.getTokenizedCardId());
+			PaymentStatus status = creditCardSimulationService.getFirstStatus(creditCard.getNumber());
+			builder.status(status).tokenizedCreditCardId(creditCard.getId());
 		} else {
-			throw new BusinessException("Card payment method requires a tokenized card");
+			builder.status(PaymentStatus.PENDING);
 		}
-
+		return builder.build();
 	}
 
-	private void loadTockenizedCard(PaymentInput input, Payment.PaymentBuilder paymentBuilder) {
-		CreditCard creditCard = creditCardRepository.findById(input.getTokenizedCardId())
+	private CreditCard findCreditCard(String tokenizedCardId) {
+		return creditCardRepository.findById(tokenizedCardId)
 				.orElseThrow(() -> new BusinessException("Credit card not found."));
-		if (creditCard.isCardExpired()) {
-			throw new BusinessException("Credit card is expired.");
+	}
+
+	private Payment findPaymentById(String paymentId) {
+		return paymentRepository.findById(paymentId)
+				.orElseThrow(() -> new BusinessException("Payment not found."));
+	}
+
+	private void validateStatus(Payment payment, PaymentStatus expectedStatus, String errorMessage) {
+		if (!payment.getStatus().equals(expectedStatus)) {
+			throw new BusinessException(errorMessage);
 		}
-		paymentBuilder.tokenizedCreditCardId(creditCard.getId());
+	}
+
+	private void updatePaymentStatus(Payment payment, PaymentStatus newStatus) {
+		payment.setStatus(newStatus);
+		paymentRepository.saveAndFlush(payment);
 	}
 
 }

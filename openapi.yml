@@ -281,11 +281,6 @@ components:
           minLength: 1
           description: Document or ID of the cardholder (e.g., Brazilian CPF, US SSN equivalent).
           example: '12345678900'
-        brand:
-          type: string
-          minLength: 1
-          description: The brand of the card (e.g., Visa, MasterCard).
-          example: Visa
         expMonth:
           type: integer
           format: int32
@@ -447,7 +442,7 @@ components:
           example: tok_xyz789abc456def123
         referenceCode:
           type: string
-          description: External identifier for the buyer/customer.
+          description: External identifier for link this payment with your own Payment/Order/Invoice.
           example: xyz456789
         replyToUrl:
           type: string

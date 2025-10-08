@@ -1,9 +1,9 @@
-
 package com.algaworks.fastpay.application.controller;
 
 import com.algaworks.fastpay.application.config.FastPayProperties;
 import com.algaworks.fastpay.application.exception.AccessDeniedOnResourceException;
 import com.algaworks.fastpay.application.model.*;
+import com.algaworks.fastpay.application.service.CreditCardSimulationService;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCard;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCardRepository;
 import jakarta.validation.Valid;
@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
-@Transactional
-@CrossOrigin(origins = "*")
 public class FastPayTokenizationController {
 
 	private final CreditCardRepository creditCardRepository;
 	private final FastPayProperties fastPayProperties;
+	private final CreditCardSimulationService creditCardSimulationService;
 
 	@PostMapping("/api/v1/public/tokenized-cards")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -39,7 +39,7 @@ public class FastPayTokenizationController {
 				.holderDocument(input.getHolderDocument())
 				.expYear(input.getExpYear())
 				.expMonth(input.getExpMonth())
-				.brand(input.getBrand())
+				.brand(creditCardSimulationService.getBrand(input.getNumber()))
 				.assignmentExpiresAt(OffsetDateTime.now().plus(fastPayProperties.getTokenizedCardExpiresIn()))
 				.build();
 

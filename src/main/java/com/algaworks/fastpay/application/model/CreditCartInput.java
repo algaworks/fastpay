@@ -21,9 +21,6 @@ public class CreditCartInput {
 	@NotBlank
 	private String holderDocument;
 
-	@NotBlank
-	private String brand;
-
 	@NotNull
 	private Integer expMonth;
 
