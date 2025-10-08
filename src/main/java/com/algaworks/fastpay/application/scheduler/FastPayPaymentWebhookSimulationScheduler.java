@@ -84,15 +84,8 @@ public class FastPayPaymentWebhookSimulationScheduler {
 			payment.setStatus(PaymentStatus.FAILED);
 			payment.setFailedAt(OffsetDateTime.now());
 		} else {
-			Optional<PaymentStatus> webhookStatus = creditCardSimulationService.getWebhookStatus(creditCard.get().getNumber());
-
-			if (webhookStatus.isPresent()) {
-				PaymentStatus paymentStatus = webhookStatus.get();
-				payment.setStatus(paymentStatus);
-
-			} else {
-
-			}
+			PaymentStatus paymentStatus = creditCardSimulationService.getWebhookStatus(creditCard.get().getNumber());
+			payment.setStatus(paymentStatus);
 
 			if (creditCard.get().getNumber().endsWith("1234")) {
 				log.warn("Payment failed test card {} ending i.", payment.getTokenizedCreditCardId());

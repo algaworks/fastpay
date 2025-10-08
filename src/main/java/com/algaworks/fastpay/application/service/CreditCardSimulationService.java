@@ -22,10 +22,10 @@ public class CreditCardSimulationService {
             new CardSimulation("5120350100064545", "Master", PaymentStatus.PROCESSING, PaymentStatus.PAID),
             new CardSimulation("5120350100064552", "Master", PaymentStatus.PROCESSING, PaymentStatus.FAILED),
             new CardSimulation("5120350100064560", "Master", PaymentStatus.PAID, PaymentStatus.REFUNDED),
-            new CardSimulation("4622943127011022", "Visa", PaymentStatus.PAID, null), // Sem Webhook Status
-            new CardSimulation("4622943127011030", "Visa", PaymentStatus.FAILED, null), // Sem Webhook Status
-            new CardSimulation("4622943127011048", "Visa", PaymentStatus.PENDING, null), // Sem Webhook Status
-            new CardSimulation("4622943127011055", "Visa", PaymentStatus.REFUNDED, null) // Sem Webhook Status
+            new CardSimulation("4622943127011022", "Visa", PaymentStatus.PAID, PaymentStatus.PAID),
+            new CardSimulation("4622943127011030", "Visa", PaymentStatus.FAILED, PaymentStatus.FAILED),
+            new CardSimulation("4622943127011048", "Visa", PaymentStatus.PENDING, PaymentStatus.PENDING),
+            new CardSimulation("4622943127011055", "Visa", PaymentStatus.REFUNDED, PaymentStatus.REFUNDED)
     );
 
     public Optional<CardSimulation> findSimulation(String creditCardNumber) {
@@ -40,14 +40,10 @@ public class CreditCardSimulationService {
                 .orElse(PaymentStatus.FAILED);
     }
 
-    public Optional<PaymentStatus> getWebhookStatus(String creditCardNumber) {
+    public PaymentStatus getWebhookStatus(String creditCardNumber) {
         return findSimulation(creditCardNumber)
-                .map(cardSimulation -> {
-                    if (cardSimulation.webhookStatus() != null) {
-                        return cardSimulation.webhookStatus();
-                    }
-                    return cardSimulation.firstStatus();
-                });
+                .map(CardSimulation::webhookStatus)
+                .orElse(PaymentStatus.FAILED);
     }
 
     public String getBrand(String creditCardNumber) {

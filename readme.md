@@ -5,17 +5,17 @@ Default database name: fastpay
 
 ## Credentials
 
-public-token: tDBmh0ZiDrmaZ8BVQD7i9UYdcj9KtZUk
-private-token: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
+- public-token: tDBmh0ZiDrmaZ8BVQD7i9UYdcj9KtZUk
+- private-token: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
 
 ## Payment Statuses
 
-PENDING
-PROCESSING
-FAILED
-PAID
-CANCELLED
-REFUNDED
+- PENDING
+- PROCESSING
+- FAILED
+- PAID
+- CANCELLED
+- REFUNDED
 
 ## Valid Credit Cards
 
@@ -25,10 +25,9 @@ REFUNDED
 | 5120350100064545 | Master | PROCESSING | PAID |
 | 5120350100064552 | Master | PROCESSING | FAILED |
 | 5120350100064560 | Master | PAID | REFUNDED |
-| 4622943127011022 | Visa | PAID | - |
-| 4622943127011030 | Visa | FAILED | - |
-| 4622943127011048 | Visa | PENDING | - |
-| 4622943127011055 | Visa | REFUNDED | - |
+| 4622943127011022 | Visa | PAID | PAID |
+| 4622943127011030 | Visa | FAILED | FAILED |
+| 4622943127011055 | Visa | REFUNDED | REFUNDED |
 
 
 
