@@ -1,7 +1,7 @@
 openapi: 3.0.4
 
 info:
-  title: Fast Pay Payment API
+  title: Fastpay Payment API
   version: v1.0
   description: API for processing payments, managing tokenized cards, and handling refunds/cancellations.
 servers:
@@ -102,6 +102,13 @@ paths:
       summary: Retrieve all payments with optional filters
       operationId: findAllPayments
       parameters:
+        - name: Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: SSEewtC6Ps5yJLdB6SJmh1bqJXgRbCdf8ocDj2hU
+          description: Private token for Token.
         - $ref: "#/components/parameters/page"
         - $ref: "#/components/parameters/size"
         - $ref: "#/components/parameters/sort"
