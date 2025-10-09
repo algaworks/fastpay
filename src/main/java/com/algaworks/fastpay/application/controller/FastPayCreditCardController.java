@@ -41,11 +41,6 @@ public class FastPayCreditCardController {
                     "Tokenized card is already assigned to a customer.", input.getTokenizedCard());
         }
 
-        if (creditCard.isAssignmentExpired()) {
-            //Expired unassigned cards will be deleted automatically
-            throw new BusinessException("Tokenized card is expired.");
-        }
-
         creditCard.assign(input.getCustomerCode());
 
         creditCardRepository.saveAndFlush(creditCard);

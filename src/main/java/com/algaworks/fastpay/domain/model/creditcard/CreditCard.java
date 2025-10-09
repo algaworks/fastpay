@@ -1,5 +1,6 @@
 package com.algaworks.fastpay.domain.model.creditcard;
 
+import com.algaworks.fastpay.application.exception.BusinessException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
@@ -72,6 +73,9 @@ public class CreditCard {
 	}
 
 	public void assign(@NotBlank String customerCode) {
+		if (isAssignmentExpired()) {
+			throw new BusinessException("Tokenized card is expired.");
+		}
 		setCustomerCode(customerCode);
 		removeExpiration();
 		setToken(null);
