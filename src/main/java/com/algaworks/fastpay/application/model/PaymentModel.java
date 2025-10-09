@@ -39,7 +39,7 @@ public class PaymentModel {
 	private OffsetDateTime refundAt;
 	private OffsetDateTime expiresAt;
 
-	public static PaymentModel.PaymentModelBuilder of(Payment payment) {
+	public static PaymentModel of(Payment payment) {
 		return PaymentModel.builder()
 				.id(payment.getId())
 				.totalAmount(payment.getTotalAmount())
@@ -58,6 +58,6 @@ public class PaymentModel {
 				.paidAt(payment.getPaidAt())
 				.refundAt(payment.getRefundAt())
 				.failedAt(payment.getFailedAt())
-				.expiresAt(payment.getExpiresAt());
+				.expiresAt(payment.getExpiresAt()).build();
 	}
 }

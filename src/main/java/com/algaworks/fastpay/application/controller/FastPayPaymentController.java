@@ -9,6 +9,10 @@ import com.algaworks.fastpay.domain.model.creditcard.CreditCard;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCardRepository;
 import com.algaworks.fastpay.domain.model.payment.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,22 +28,33 @@ public class FastPayPaymentController {
 
 	@PostMapping("/api/v1/payments")
 	@ResponseStatus(HttpStatus.CREATED)
-	public PaymentModel capture(@RequestBody PaymentInput input, @RequestHeader("Token") String prvToken) {
+	public PaymentModel capture(@RequestBody PaymentInput input,
+								@RequestHeader("Token") String prvToken) {
 		verifyPrivateToken(prvToken);
 		Payment payment = paymentRepository.saveAndFlush(buildPayment(input));
-		return PaymentModel.of(payment).build();
+		return PaymentModel.of(payment);
+	}
+
+	@GetMapping("/api/v1/payments")
+	public PagedModel<PaymentModel> findAll(@PageableDefault Pageable pageable,
+										  	@RequestHeader("Token") String prvToken) {
+		verifyPrivateToken(prvToken);
+		Page<Payment> paymentPage = paymentRepository.findAll(pageable);
+		return new PagedModel<>(paymentPage.map(PaymentModel::of));
 	}
 
 	@GetMapping("/api/v1/payments/{paymentId}")
-	public PaymentModel findById(@PathVariable String paymentId, @RequestHeader("Token") String prvToken) {
+	public PaymentModel findById(@PathVariable String paymentId,
+								 @RequestHeader("Token") String prvToken) {
 		verifyPrivateToken(prvToken);
 		Payment payment = findPaymentById(paymentId);
-		return PaymentModel.of(payment).build();
+		return PaymentModel.of(payment);
 	}
 
 	@PutMapping("/api/v1/payments/{paymentId}/refund")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void refund(@PathVariable String paymentId, @RequestHeader("Token") String prvToken) {
+	public void refund(@PathVariable String paymentId,
+					   @RequestHeader("Token") String prvToken) {
 		verifyPrivateToken(prvToken);
 		Payment payment = findPaymentById(paymentId);
 		validateStatus(payment, PaymentStatus.PAID, "Payment is not paid, it cannot be refunded.");
@@ -48,7 +63,8 @@ public class FastPayPaymentController {
 
 	@PutMapping("/api/v1/payments/{paymentId}/cancel")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void cancel(@PathVariable String paymentId, @RequestHeader("Token") String prvToken) {
+	public void cancel(@PathVariable String paymentId,
+					   @RequestHeader("Token") String prvToken) {
 		verifyPrivateToken(prvToken);
 		Payment payment = findPaymentById(paymentId);
 		validateStatus(payment, PaymentStatus.PENDING, String.format("Payment is not pending, it is %s, it cannot be cancelled.", payment.getStatus()));
