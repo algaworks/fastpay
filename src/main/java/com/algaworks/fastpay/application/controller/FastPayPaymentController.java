@@ -65,17 +65,17 @@ public class FastPayPaymentController {
 		Payment.PaymentBuilder builder = input.toPayment();
 		PaymentStatus status = PaymentStatus.PENDING;
 		if (input.getMethod().equals(PaymentMethod.CREDIT)) {
-			CreditCard creditCard = findCreditCard(input.getTokenizedCardId());
+			CreditCard creditCard = findCreditCard(input.getCreditCardId());
             status = creditCardSimulationService.getFirstStatus(creditCard.getNumber());
-			builder.tokenizedCreditCardId(creditCard.getId());
+			builder.creditCardId(creditCard.getId());
 		}
 		Payment payment = builder.build();
 		payment.updateStatus(status);
 		return payment;
 	}
 
-	private CreditCard findCreditCard(String tokenizedCardId) {
-		return creditCardRepository.findById(tokenizedCardId)
+	private CreditCard findCreditCard(String creditCardId) {
+		return creditCardRepository.findById(creditCardId)
 				.orElseThrow(() -> new BusinessException("Credit card not found."));
 	}
 

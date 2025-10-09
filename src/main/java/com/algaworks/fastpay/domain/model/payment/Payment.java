@@ -6,7 +6,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -51,7 +50,7 @@ public class Payment {
 
 	private String zipCode;
 
-	private String tokenizedCreditCardId;
+	private String creditCardId;
 	private String referenceCode;
 
 	private String replyToUrl;

@@ -2,6 +2,7 @@ package com.algaworks.fastpay.domain.model.creditcard;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -20,7 +21,7 @@ public class CreditCard {
 
 	@Id
 	@Builder.Default
-	private String id = "tok_" + RandomStringUtils.secure().nextAlphanumeric(32).toLowerCase(Locale.ROOT);
+	private String id = "cc_" + RandomStringUtils.secure().nextAlphanumeric(32).toLowerCase(Locale.ROOT);
 
 	private String number;
 	private String cvv;
@@ -34,6 +35,9 @@ public class CreditCard {
 	private String brand;
 
 	private String customerCode;
+
+	@Builder.Default
+	private String token = "tok_" + RandomStringUtils.secure().nextAlphanumeric(64).toLowerCase(Locale.ROOT);
 
 	private OffsetDateTime assignmentExpiresAt; //Assignment expiration, not card expiration
 
@@ -65,5 +69,11 @@ public class CreditCard {
 
 	public boolean isAssigned() {
 		return getCustomerCode() != null;
+	}
+
+	public void assign(@NotBlank String customerCode) {
+		setCustomerCode(customerCode);
+		removeExpiration();
+		setToken(null);
 	}
 }

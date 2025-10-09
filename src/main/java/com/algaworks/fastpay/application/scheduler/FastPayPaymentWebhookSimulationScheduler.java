@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -78,13 +77,13 @@ public class FastPayPaymentWebhookSimulationScheduler {
 	}
 
 	private void simulateCreditCard(Payment payment) {
-		if (payment.getTokenizedCreditCardId() == null) {
+		if (payment.getCreditCardId() == null) {
 			log.warn("Payment {} via card but card ID is null", payment.getId());
 		}
 
-		var creditCard = creditCardRepository.findById(payment.getTokenizedCreditCardId());
+		var creditCard = creditCardRepository.findById(payment.getCreditCardId());
 		if (creditCard.isEmpty()) {
-			log.warn("Payment failed invalid card {}.", payment.getTokenizedCreditCardId());
+			log.warn("Payment failed invalid card {}.", payment.getCreditCardId());
 			payment.updateStatus(PaymentStatus.FAILED);
 		} else {
 			PaymentStatus paymentStatus = creditCardSimulationService.getWebhookStatus(creditCard.get().getNumber());

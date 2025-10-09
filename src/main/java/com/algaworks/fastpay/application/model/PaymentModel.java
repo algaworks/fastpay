@@ -28,7 +28,7 @@ public class PaymentModel {
 
 	private String zipCode;
 
-	private String tokenizedCreditCardId;
+	private String creditCardId;
 	private String referenceCode;
 
 	private String replyToUrl;
@@ -51,7 +51,7 @@ public class PaymentModel {
 				.addressLine1(payment.getAddressLine1())
 				.addressLine2(payment.getAddressLine2())
 				.zipCode(payment.getZipCode())
-				.tokenizedCreditCardId(payment.getTokenizedCreditCardId())
+				.creditCardId(payment.getCreditCardId())
 				.referenceCode(payment.getReferenceCode())
 				.replyToUrl(payment.getReplyToUrl())
 				.createdAt(payment.getCreatedAt())

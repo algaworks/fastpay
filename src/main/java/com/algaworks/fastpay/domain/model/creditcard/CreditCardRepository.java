@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.Lock;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface CreditCardRepository extends JpaRepository<CreditCard, String> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	void deleteAllByAssignmentExpiresAtLessThan(OffsetDateTime offsetDateTime);
-
 	List<CreditCard> findAllByCustomerCode(String customerCode);
+    Optional<CreditCard> findByToken(String tokenizedCard);
 }

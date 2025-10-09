@@ -95,9 +95,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenizedCardModel'
-              example:
-                tokenizedCard: tok_xyz789abc456def123
-                expiresAt: '2026-10-07T14:00:00Z'
   /payments:
     post:
       tags:
@@ -126,22 +123,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentModel'
-              example:
-                id: pay_abc123def456ghi789
-                totalAmount: 125.5
-                status: PAID
-                method: CREDIT
-                fullName: Jane Doe
-                document: '98765432100'
-                phone: '+15551234567'
-                addressLine1: 456 Oak St
-                addressLine2: Apt 2B
-                tokenizedCreditCardId: tok_xyz789abc456def123
-                referenceCode: xyz456789
-                replyToUrl: https://my-app.com/payment/status/pay_abc123def456ghi789
-                createdAt: '2025-10-07T15:00:00Z'
-                paidAt: '2025-10-07T15:01:15Z'
-                expiresAt: '2025-11-07T15:00:00Z'
   /credit-cards:
     get:
       tags:
@@ -165,17 +146,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LimitedCreditCardModel'
-              example:
-                - id: cc_123abc456def
-                  lastNumbers: '1234'
-                  expMonth: 12
-                  expYear: 2028
-                  brand: Visa
-                - id: cc_789ghi012jkl
-                  lastNumbers: '5678'
-                  expMonth: 5
-                  expYear: 2026
-                  brand: MasterCard
     post:
       tags:
         - Card Management
@@ -204,12 +174,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LimitedCreditCardModel'
-              example:
-                id: cc_123abc456def
-                lastNumbers: '1234'
-                expMonth: 12
-                expYear: 2028
-                brand: Visa
+  /credit-cards/{creditCardId}:
+    get:
+      tags:
+        - Card Management
+      summary: Get credit card by ID
+      operationId: getCreditCardById
+      parameters:
+        - name: creditCardId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: cc_xyz789abc456def123
+          description: The unique id identifier.
+      responses:
+        '200':
+          description: OK. Credit card found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitedCreditCardModel'
+        '404':
+          description: Credit card not found.
+    delete:
+      tags:
+        - Card Management
+      summary: Delete credit card by ID
+      operationId: deleteCreditCardById
+      parameters:
+        - name: creditCardId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: cc_xyz789abc456def123
+          description: The unique id identifier.
+      responses:
+        '204':
+          description: OK. Credit card deleted successfully.
+        '404':
+          description: Credit card not found.
   /payments/{paymentId}:
     get:
       tags:
@@ -248,7 +253,7 @@ paths:
                 phone: '+15551234567'
                 addressLine1: 456 Oak St
                 addressLine2: Apt 2B
-                tokenizedCreditCardId: tok_xyz789abc456def123
+                creditCardId: cc_xyz789abc456def123
                 referenceCode: xyz456789
                 replyToUrl: https://my-app.com/payment/status/pay_abc123def456ghi789
                 createdAt: '2025-10-07T15:00:00Z'
@@ -317,7 +322,7 @@ components:
         tokenizedCard:
           type: string
           description: The secure, non-PCI token representing the credit card.
-          example: tok_xyz789abc456def123
+          example: tok_tok_qfxj14un9xhtsosrwk8rxktz5ks63tqxocsiha1iw4wu4a1zhwc0b9iutcsajjkq
         expiresAt:
           type: string
           format: date-time
@@ -363,10 +368,10 @@ components:
           type: string
           description: Second line of the billing address (e.g., Apartment, Suite).
           example: Apt 2B
-        tokenizedCardId:
+        creditCardId:
           type: string
           description: The ID of the tokenized card to use for the payment.
-          example: tok_xyz789abc456def123
+          example: cc_xyz789abc456def123
         referenceCode:
           type: string
           minLength: 1
@@ -439,10 +444,10 @@ components:
           type: string
           description: Second line of the billing address.
           example: Apt 2B
-        tokenizedCreditCardId:
+        creditCardId:
           type: string
           description: The ID of the tokenized card used.
-          example: tok_xyz789abc456def123
+          example: cc_xyz789abc456def123
         referenceCode:
           type: string
           description: External identifier for link this payment with your own Payment/Order/Invoice.
@@ -484,17 +489,14 @@ components:
       type: object
       description: Input for saving a tokenized card to a customer's profile.
       properties:
-        tokenizedCardId:
+        tokenizedCard:
           type: string
           description: The token ID obtained from the tokenization endpoint.
-          example: tok_xyz789abc456def123
+          example: tok_tok_qfxj14un9xhtsosrwk8rxktz5ks63tqxocsiha1iw4wu4a1zhwc0b9iutcsajjkq
         customerCode:
           type: string
           description: External identifier for the customer.
           example: 6e148bd5-47f6-4022-b9da-07cfaa294f7a
-      example:
-        tokenizedCardId: tok_xyz789abc456def123
-        customerCode: 6e148bd5-47f6-4022-b9da-07cfaa294f7a
     LimitedCreditCardModel:
       type: object
       description: Model representing a saved card with limited details for display.

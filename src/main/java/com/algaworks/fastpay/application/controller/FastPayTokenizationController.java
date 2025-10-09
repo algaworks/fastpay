@@ -50,7 +50,8 @@ public class FastPayTokenizationController {
 
 		creditCardRepository.saveAndFlush(creditCard);
 
-		return new TokenizedCardModel(creditCard.getId(), creditCard.getAssignmentExpiresAt());
+		return new TokenizedCardModel(creditCard.getToken(),
+				creditCard.getAssignmentExpiresAt());
 	}
 
 }

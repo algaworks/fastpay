@@ -30,7 +30,7 @@ public class PaymentInput {
 
 	private String addressLine2;
 
-	private String tokenizedCardId;
+	private String creditCardId;
 
 	@NotBlank
 	private String referenceCode;
