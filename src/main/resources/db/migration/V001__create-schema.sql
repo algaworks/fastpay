@@ -1,6 +1,6 @@
 create table public.credit_card (
     id varchar(255) not null,
-    token varchar(255) not null,
+    token varchar(255),
     brand varchar(255),
     customer_code varchar(255),
     cvv varchar(255),
