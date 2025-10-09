@@ -10,6 +10,7 @@ import com.algaworks.fastpay.application.model.TokenizedCreditCardInput;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCard;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCardRepository;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -56,12 +57,12 @@ public class FastPayCreditCardController {
 
     @DeleteMapping("/api/v1/credit-cards/{creditCardId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@RequestParam String creditCardId) {
+    public void deleteById(@PathVariable String creditCardId) {
         creditCardRepository.deleteById(creditCardId);
     }
 
     @GetMapping("/api/v1/credit-cards/{creditCardId}")
-    public LimitedCreditCardModel getById(@RequestParam String creditCardId) {
+    public LimitedCreditCardModel getById(@PathVariable String creditCardId) {
         CreditCard creditCard = creditCardRepository.findById(creditCardId)
                 .orElseThrow(()-> new DomainEntityNotFound(String.format("Credit card %s not found.", creditCardId)));
         return LimitedCreditCardModel.of(creditCard);
