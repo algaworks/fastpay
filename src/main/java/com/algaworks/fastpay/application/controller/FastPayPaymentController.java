@@ -8,6 +8,7 @@ import com.algaworks.fastpay.application.service.CreditCardSimulationService;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCard;
 import com.algaworks.fastpay.domain.model.creditcard.CreditCardRepository;
 import com.algaworks.fastpay.domain.model.payment.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +29,7 @@ public class FastPayPaymentController {
 
 	@PostMapping("/api/v1/payments")
 	@ResponseStatus(HttpStatus.CREATED)
-	public PaymentModel capture(@RequestBody PaymentInput input,
+	public PaymentModel capture(@Valid @RequestBody PaymentInput input,
 								@RequestHeader("Token") String prvToken) {
 		verifyPrivateToken(prvToken);
 		Payment payment = paymentRepository.saveAndFlush(buildPayment(input));
