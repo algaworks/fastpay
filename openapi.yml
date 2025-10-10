@@ -42,7 +42,7 @@ paths:
     put:
       tags:
         - Payment Management
-      summary: Cancel a pending or processing payment
+      summary: Cancel a pending payment
       operationId: cancelPayment
       parameters:
         - name: paymentId
