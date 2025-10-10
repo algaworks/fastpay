@@ -13,7 +13,7 @@ public class PaymentInput {
 	@NotNull
 	private BigDecimal totalAmount;
 
-	@NotBlank
+	@NotNull
 	private PaymentMethod method;
 
 	@NotBlank
