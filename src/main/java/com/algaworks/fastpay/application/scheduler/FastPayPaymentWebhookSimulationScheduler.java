@@ -65,10 +65,12 @@ public class FastPayPaymentWebhookSimulationScheduler {
 
 		log.info("Notifying payment {} as {} on {}", payment.getId(), payment.getStatus(), payment.getReplyToUrl());
 
-		webhookClient.send(new PaymentWebhookEvent(payment.getId(),
+		PaymentWebhookEvent webhookEvent = new PaymentWebhookEvent(payment.getId(),
+				payment.getReferenceCode(),
 				payment.getStatus(),
-				OffsetDateTime.now()),
-				payment.getReplyToUrl());
+				OffsetDateTime.now());
+
+		webhookClient.send(webhookEvent, payment.getReplyToUrl());
 	}
 
 	private void simulateGateway(Payment payment) {

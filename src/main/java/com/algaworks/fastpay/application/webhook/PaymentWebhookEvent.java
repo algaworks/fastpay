@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 public class PaymentWebhookEvent {
 	private String paymentId;
+	private String referenceCode;
 	private PaymentStatus status;
 	private OffsetDateTime notifiedAt;
 }
