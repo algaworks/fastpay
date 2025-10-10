@@ -19,7 +19,7 @@ Default database name: fastpay
 - PROCESSING
 - FAILED
 - PAID
-- CANCELLED
+- CANCELED
 - REFUNDED
 
 ## Valid Credit Cards

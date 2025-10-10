@@ -67,8 +67,8 @@ public class FastPayPaymentController {
 					   @RequestHeader("Token") String prvToken) {
 		verifyPrivateToken(prvToken);
 		Payment payment = findPaymentById(paymentId);
-		validateStatus(payment, PaymentStatus.PENDING, String.format("Payment is not pending, it is %s, it cannot be cancelled.", payment.getStatus()));
-		updatePaymentStatus(payment, PaymentStatus.CANCELLED);
+		validateStatus(payment, PaymentStatus.PENDING, String.format("Payment is not pending, it is %s, it cannot be CANCELED.", payment.getStatus()));
+		updatePaymentStatus(payment, PaymentStatus.CANCELED);
 	}
 
 	private void verifyPrivateToken(String prvToken) {

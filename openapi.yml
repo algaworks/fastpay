@@ -37,7 +37,7 @@ paths:
         '404':
           description: Payment not found.
         '409':
-          description: Payment cannot be refunded (e.g., already refunded or cancelled).
+          description: Payment cannot be refunded (e.g., already refunded or CANCELED).
   /payments/{paymentId}/cancel:
     put:
       tags:
@@ -61,11 +61,11 @@ paths:
           description: Private token for Token.
       responses:
         '204':
-          description: No Content. Payment was successfully cancelled.
+          description: No Content. Payment was successfully CANCELED.
         '404':
           description: Payment not found.
         '409':
-          description: Payment cannot be cancelled (e.g., already paid or refunded).
+          description: Payment cannot be CANCELED (e.g., already paid or refunded).
   /public/tokenized-cards:
     post:
       tags:
