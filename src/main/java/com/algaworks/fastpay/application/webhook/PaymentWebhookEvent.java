@@ -1,6 +1,5 @@
 package com.algaworks.fastpay.application.webhook;
 
-import com.algaworks.fastpay.domain.model.payment.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +14,7 @@ import java.time.OffsetDateTime;
 public class PaymentWebhookEvent {
 	private String paymentId;
 	private String referenceCode;
-	private PaymentStatus status;
+	private String status;
+	private String method;
 	private OffsetDateTime notifiedAt;
 }
