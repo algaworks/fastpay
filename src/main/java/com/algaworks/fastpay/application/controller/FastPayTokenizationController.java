@@ -30,7 +30,7 @@ public class FastPayTokenizationController {
 									   @RequestHeader("Token") String pubToken) {
 
 		if (!fastPayProperties.getPublicToken().equals(pubToken)) {
-			throw new AccessDeniedOnResourceException("Use a valid private token.");
+			throw new AccessDeniedOnResourceException("Use a valid public token.");
 		}
 
 		CreditCard creditCard = CreditCard.builder()
