@@ -68,6 +68,7 @@ public class FastPayPaymentWebhookSimulationScheduler {
 		PaymentWebhookEvent webhookEvent = new PaymentWebhookEvent(payment.getId(),
 				payment.getReferenceCode(),
 				payment.getStatus(),
+				payment.getMethod(),
 				OffsetDateTime.now());
 
 		webhookClient.send(webhookEvent, payment.getReplyToUrl());
