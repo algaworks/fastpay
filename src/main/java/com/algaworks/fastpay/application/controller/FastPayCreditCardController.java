@@ -58,6 +58,8 @@ public class FastPayCreditCardController {
     @DeleteMapping("/api/v1/credit-cards/{creditCardId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable String creditCardId) {
+        creditCardRepository.findById(creditCardId)
+                .orElseThrow(()-> new DomainEntityNotFound(String.format("Credit card %s not found.", creditCardId)));
         creditCardRepository.deleteById(creditCardId);
     }
 
